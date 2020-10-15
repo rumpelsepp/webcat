@@ -88,7 +88,7 @@ func main() {
 	getopt.IntVar(&opts.keepalive, "k", 0, "Set ping interval in seconds")
 	getopt.StringVar(&opts.listen, "l", "", "Set listen address")
 	getopt.StringVar(&opts.listenPath, "p", "/ws", "Set uri path")
-	getopt.StringVar(&opts.target, "t", "-", "Set target to proxy to")
+	getopt.StringVar(&opts.target, "t", "-", "Set target to proxy or connect to")
 	h := getopt.Bool("h", false, "Show this page and exit")
 	if err := getopt.Parse(); err != nil {
 		panic(err)
@@ -118,8 +118,11 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
+		if opts.target == "-" {
+			fmt.Println("error: invalid target")
+			os.Exit(1)
+		}
 		var (
-			target    = getopt.Args()[0]
 			d         = websocket.DefaultDialer
 			reqHeader = make(http.Header)
 		)
@@ -127,7 +130,7 @@ func main() {
 			p := strings.SplitN(opts.header, ":", 2)
 			reqHeader.Set(p[0], p[1])
 		}
-		conn, _, err := d.Dial(target, reqHeader)
+		conn, _, err := d.Dial(opts.target, reqHeader)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
