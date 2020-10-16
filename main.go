@@ -61,12 +61,13 @@ func (p *proxy) handleWS(w http.ResponseWriter, r *http.Request) {
 		c2 io.ReadWriteCloser
 	)
 	switch p.target {
-	case "stdio":
+	case "-":
 		c2 = NewStdioWrapper()
 	default:
 		c, err := net.Dial("tcp", p.target)
 		if err != nil {
-			conn.Close()
+			fmt.Println(err)
+			return
 		}
 		c2 = c
 	}
