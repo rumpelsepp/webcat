@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -46,9 +47,11 @@ func (w *wrapper) Read(p []byte) (int, error) {
 }
 
 type WSTransportWrapper struct {
-	Conn      *websocket.Conn
-	wrap      *wrapper
-	bufReader *bufio.Reader
+	Conn             *websocket.Conn
+	wrap             *wrapper
+	bufReader        *bufio.Reader
+	mutex            sync.Mutex
+	keepAliveRunning bool
 }
 
 func NewWSTransportWrapper(conn *websocket.Conn) *WSTransportWrapper {
@@ -62,16 +65,29 @@ func NewWSTransportWrapper(conn *websocket.Conn) *WSTransportWrapper {
 	}
 }
 
-func (t *WSTransportWrapper) SetKeepAlive(ti time.Duration) {
+func (t *WSTransportWrapper) SetKeepAlive(timeOut time.Duration) error {
+	t.mutex.Lock()
+	if t.keepAliveRunning {
+		t.mutex.Unlock()
+		return fmt.Errorf("keep alive is already running")
+	}
+	t.mutex.Unlock()
 	go func() {
 		for {
-			d := time.Now().Add(ti)
+			t.mutex.Lock()
+			if !t.keepAliveRunning {
+				t.mutex.Unlock()
+				return
+			}
+			t.mutex.Unlock()
+			d := time.Now().Add(timeOut)
 			if err := t.Conn.WriteControl(websocket.PingMessage, nil, d); err != nil {
 				return
 			}
-			time.Sleep(ti)
+			time.Sleep(timeOut)
 		}
 	}()
+	return nil
 }
 
 func (t *WSTransportWrapper) Read(p []byte) (int, error) {

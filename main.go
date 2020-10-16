@@ -143,7 +143,7 @@ func main() {
 			s = NewStdioWrapper()
 		)
 		if opts.keepalive > 0 {
-			c.SetKeepAlive(time.Duration(opts.keepalive) * time.Second)
+			go c.SetKeepAlive(time.Duration(opts.keepalive) * time.Second)
 		}
 		helpers.BidirectCopy(c, s)
 	}
