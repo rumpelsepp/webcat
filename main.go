@@ -1,6 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"crypto/tls"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net"
@@ -75,10 +79,11 @@ func (p *proxy) handleWS(w http.ResponseWriter, r *http.Request) {
 }
 
 type runtimeOptions struct {
-	keepalive  int
-	listen     string
-	listenPath string
-	target     string
+	keepalive   int
+	listen      string
+	listenPath  string
+	target      string
+	fingerprint string
 	// TODO: make list
 	header string
 }
@@ -87,6 +92,7 @@ func main() {
 	opts := runtimeOptions{}
 	getopt.StringVar(&opts.header, "H", "", "Specify request header")
 	getopt.IntVar(&opts.keepalive, "k", 0, "Set ping interval in seconds")
+	getopt.StringVar(&opts.fingerprint, "f", "", "Set SHA-256 fingerprint of certificate")
 	getopt.StringVar(&opts.listen, "l", "", "Set listen address")
 	getopt.StringVar(&opts.listenPath, "p", "/ws", "Set uri path")
 	getopt.StringVar(&opts.target, "t", "-", "Set target to proxy or connect to")
@@ -123,8 +129,31 @@ func main() {
 			fmt.Println("error: invalid target")
 			os.Exit(1)
 		}
+
+		d := websocket.DefaultDialer
+		if opts.fingerprint != "" {
+			fp, err := hex.DecodeString(opts.fingerprint)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			tlsConfig := &tls.Config{
+				VerifyConnection: func(cs tls.ConnectionState) error {
+					digest := sha256.Sum256(cs.PeerCertificates[0].Raw)
+					if bytes.Equal(fp, digest[:]) {
+						return nil
+					}
+					return fmt.Errorf("invalid cert: %x; expected %x", fp, digest[:])
+				},
+			}
+			d = &websocket.Dialer{
+				Proxy:            http.ProxyFromEnvironment,
+				HandshakeTimeout: 45 * time.Second,
+				TLSClientConfig:  tlsConfig,
+			}
+		}
+
 		var (
-			d         = websocket.DefaultDialer
 			reqHeader = make(http.Header)
 		)
 		if opts.header != "" {
