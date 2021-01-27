@@ -137,7 +137,7 @@ func main() {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			tlsConfig := &tls.Config{
+			d.TLSClientConfig = &tls.Config{
 				VerifyConnection: func(cs tls.ConnectionState) error {
 					digest := sha256.Sum256(cs.PeerCertificates[0].Raw)
 					if bytes.Equal(fp, digest[:]) {
@@ -145,11 +145,6 @@ func main() {
 					}
 					return fmt.Errorf("invalid cert: %x; expected %x", fp, digest[:])
 				},
-			}
-			d = &websocket.Dialer{
-				Proxy:            http.ProxyFromEnvironment,
-				HandshakeTimeout: 45 * time.Second,
-				TLSClientConfig:  tlsConfig,
 			}
 		}
 
