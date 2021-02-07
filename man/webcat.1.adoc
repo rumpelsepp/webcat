@@ -1,0 +1,45 @@
+= webcat(1)
+:doctype:    manpage
+
+== Name
+
+webcat - the swiss army knife for websocket
+
+== Synopsis
+
+    webcat [OPTIONS]
+
+== Description
+
+webcat is a tool which very similar to the well known `netcat` utility.
+It reads data from stdin and prints received data to stdout.
+Instead of using raw TCP connections webcat uses the websocket protocol (RFC6455).
+
+== Options
+
+`-H HEADER`::
+    Set a request header in the form `NAME=VALUE`.
+    This header is sent in the initial HTTP request which is then upgraded to a websocket connection.
+
+`-f SHA256 VALUE`::
+    Set the expected SHA256 value of the server certificate.
+    The hashsum is calculated over the whole certificate in DER encoding.
+
+`-k SECONDS`::
+    Send websocket keep alive probes every `SECONDS` seconds.
+
+`-l ADDRESS`::
+    Be a server and listen on this address.
+
+`-t TARGET`::
+    Connect to `TARGET`.
+    When in server mode and target is not `-` (means stdout) then the incoming connection is proxied to `TARGET`.
+
+== Example
+
+For using an SSH through websocket see this blog article: https://rumpelsepp.org/blog/ssh-through-websocket/
+
+== Authors
+
+Maintained by Stefan Tatschner <stefan@rumpelsepp.org>.
+The Git repository is hosted here: https://git.sr.ht/~rumpelsepp/webcat
