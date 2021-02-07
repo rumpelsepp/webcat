@@ -35,7 +35,7 @@ Instead of using raw TCP connections webcat uses the websocket protocol (RFC6455
     Connect to `TARGET`.
     When in server mode and target is not `-` (means stdout) then the incoming connection is proxied to `TARGET`.
 
-== Example
+== Examples
 
 For using an SSH through websocket see this blog article: https://rumpelsepp.org/blog/ssh-through-websocket/
 
