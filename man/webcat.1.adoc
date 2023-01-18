@@ -18,20 +18,29 @@ Instead of using raw TCP connections webcat uses the websocket protocol (RFC6455
 == Options
 
 `-H HEADER`::
+`--header` HEADER::
     Set a request header in the form `NAME=VALUE`.
     This header is sent in the initial HTTP request which is then upgraded to a websocket connection.
 
 `-f SHA256 VALUE`::
+`--fingerprint` VALUE::
     Set the expected SHA256 value of the server certificate.
     The hashsum is calculated over the whole certificate in DER encoding.
 
 `-k SECONDS`::
+`--keepalive SECONDS`::
     Send websocket keep alive probes every `SECONDS` seconds.
 
 `-l ADDRESS`::
+`--listen` ADDRESS::
     Be a server and listen on this address.
 
+`-p PATH`::
+`--path PATH`::
+    Set the http path, e.g. `/foo`.
+
 `-t TARGET`::
+`--target TARGET`::
     Connect to `TARGET`.
     When in server mode and target is not `-` (means stdout) then the incoming connection is proxied to `TARGET`.
 
