@@ -42,4 +42,4 @@ For using an SSH through websocket see this blog article: https://rumpelsepp.org
 == Authors
 
 Maintained by Stefan Tatschner <stefan@rumpelsepp.org>.
-The Git repository is hosted here: https://git.sr.ht/~rumpelsepp/webcat
+The Git repository is hosted here: https://github.com/rumpelsepp/webcat
