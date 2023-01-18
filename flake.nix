@@ -9,6 +9,7 @@
     in {
       devShell.x86_64-linux = pkgs.mkShell {
         buildInputs = with pkgs; [
+          asciidoctor
           go_1_19
           gnumake
           gopls
