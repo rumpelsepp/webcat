@@ -13,10 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"git.sr.ht/~rumpelsepp/helpers"
-	"git.sr.ht/~sircmpwn/getopt"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/spf13/pflag"
 )
 
 type stdioWrapper struct {
@@ -75,7 +74,7 @@ func (p *proxy) handleWS(w http.ResponseWriter, r *http.Request) {
 		}
 		c2 = c
 	}
-	helpers.BidirectCopy(c1, c2)
+	bidirectCopy(c1, c2)
 }
 
 type runtimeOptions struct {
@@ -90,21 +89,13 @@ type runtimeOptions struct {
 
 func main() {
 	opts := runtimeOptions{}
-	getopt.StringVar(&opts.header, "H", "", "Specify request header")
-	getopt.IntVar(&opts.keepalive, "k", 0, "Set ping interval in seconds")
-	getopt.StringVar(&opts.fingerprint, "f", "", "Set SHA-256 fingerprint of certificate")
-	getopt.StringVar(&opts.listen, "l", "", "Set listen address")
-	getopt.StringVar(&opts.listenPath, "p", "/ws", "Set uri path")
-	getopt.StringVar(&opts.target, "t", "-", "Set target to proxy or connect to")
-	h := getopt.Bool("h", false, "Show this page and exit")
-	if err := getopt.Parse(); err != nil {
-		panic(err)
-	}
-
-	if *h {
-		getopt.Usage()
-		os.Exit(0)
-	}
+	pflag.StringVarP(&opts.header, "header", "H", "", "Specify request header")
+	pflag.IntVarP(&opts.keepalive, "keepalive", "k", 0, "Set ping interval in seconds")
+	pflag.StringVarP(&opts.fingerprint, "fingerprint", "f", "", "Set SHA-256 fingerprint of certificate")
+	pflag.StringVarP(&opts.listen, "listen", "l", "", "Set listen address")
+	pflag.StringVarP(&opts.listenPath, "path", "p", "/ws", "Set uri path")
+	pflag.StringVarP(&opts.target, "target", "t", "-", "Set target to proxy or connect to")
+	pflag.Parse()
 
 	if opts.listen != "" {
 		p := proxy{
@@ -169,6 +160,6 @@ func main() {
 		if opts.keepalive > 0 {
 			go c.SetKeepAlive(time.Duration(opts.keepalive) * time.Second)
 		}
-		helpers.BidirectCopy(c, s)
+		bidirectCopy(c, s)
 	}
 }
