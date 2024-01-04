@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: Stefan Tatschner <stefan@rumpelsepp.org>
+#
+# SPDX-License-Identifier: MPL-2.0
+
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs";
@@ -9,12 +13,11 @@
     in {
       devShell.x86_64-linux = pkgs.mkShell {
         buildInputs = with pkgs; [
-          asciidoctor
-          go_1_19
+          go
           gnumake
           gopls
           gotools
-          efm-langserver
+          reuse
         ];
       };
       formatter.x86_64-linux = pkgs.nixpkgs-fmt;
